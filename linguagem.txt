@@ -1,0 +1,37 @@
+% Linguagem que Criamos
+
+% `%` é comentado
+
+% Declarar variáveis inteiras
+int x, int y, int resultado;
+
+% Instrução de atribuição
+x = 5;
+y = 10;
+
+% Operações aritméticas
+resultado = x + y;
+altera resultado = resultado * 2;
+
+% Operações relacionais
+se (x > y) entao
+  escrever("x é maior que y");
+senao
+  escrever("y é maior que x");
+fim_cond;
+
+% Entrada do usuário
+imprimir("Digite um valor para x: ");
+input(x);
+
+% Estrutura de repetição while-do
+enquanto (x > 0) faz
+  imprimir(x);
+  altera x = x - 1;
+fim_enquanto;
+
+% Fim do Código
+
+lista int 5, arr;
+matriz int 3 2, mat;
+altera mat[0][1] = 2;

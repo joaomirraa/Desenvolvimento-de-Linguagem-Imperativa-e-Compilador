@@ -1,0 +1,7 @@
+int x ;
+x = 4;
+ifse (x >5) entao
+    imprimir ( " maior " ) ;
+senao
+    imprimir ( " menor " ) ;
+fim_cond ;

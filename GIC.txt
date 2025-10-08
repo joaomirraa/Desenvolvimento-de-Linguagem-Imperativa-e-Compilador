@@ -1,0 +1,49 @@
+### Gramatica Idependente do Contexto
+
+Programa : Decls Codigo
+         | Codigo
+
+Decls    : Declaracao PONTOVIRGULA
+         | Declaracao VIRGULA Decls
+
+Declaracao : INT ID
+
+Codigo   : Proc Codigo
+         | Atrib
+         | 
+
+Atrib    : ID AtribOp PONTOVIRGULA
+
+AtribOp  : IGUAL expr
+
+expr     : NUM
+         | ID
+         | INPUT
+         | exprArit
+         | exprRel
+
+exprArit : expr PLUS expr
+         | expr MINUS expr
+         | expr DIVIDE expr
+         | expr TIMES expr
+
+exprRel  : expr MAIOR expr
+         | expr MAIOROUIGUAL expr
+         | expr MENOR expr
+         | expr MENOROUIGUAL expr
+         | expr IGUALIGUAL expr
+
+Proc     : IF
+         | WHILE
+         | PRINTAR
+         | INPUTing
+
+IF       : SE LPAREN exprRel RPAREN ENTAO Codigo FIM_COND PONTOVIRGULA
+         | SE LPAREN exprRel RPAREN ENTAO Codigo SENAO Codigo FIM_COND PONTOVIRGULA
+
+WHILE : ENQUANTO LPAREN exprRel RPAREN FAZ Codigo FIM_ENQUANTO PONTOVIRGULA
+
+PRINTAR : IMPRIMIR LPAREN ASPAS ID ASPAS RPAREN PONTOVIRGULA
+        | IMPRIMIR LPAREN expr RPAREN PONTOVIRGULA
+
+INPUTing : INPUT LPAREN ID RPAREN PONTOVIRGULA

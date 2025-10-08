@@ -1,0 +1,9 @@
+int x ;
+int y ;
+
+x = 2*4 + 5;
+y = 5 + 4*2;
+
+imprimir ( x ) ;
+imprimir ( " \ n " ) ;
+imprimir ( y ) ;

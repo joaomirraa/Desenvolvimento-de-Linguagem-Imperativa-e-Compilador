@@ -1,0 +1,81 @@
+##
+
+    Programa : Decls
+             | Atrib
+             | Decls Corpo
+             | Atrib Corpo
+             | Corpo
+
+    Corpo : Codigo
+
+    Codigo : Proc Codigo
+           | Atrib Codigo
+           | Proc
+           | Atrib
+
+    Decls : Decl PONTOVIRGULA
+          | Decl VIRGULA Decls
+
+    Decl : INT ID
+
+    Atrib : INT ID IGUAL expr
+
+    expr : NUM
+         | ID
+         | ENTRADAS
+         | exprArit
+         | exprRel
+
+    exprArit : expr PLUS expr
+             | expr MINUS expr
+             | expr TIMES expr
+             | expr DIVIDE expr
+
+    exprRel : expr IGUALIGUAL expr
+            | expr DIFERENTE expr
+            | expr MENOR expr
+            | expr MENOROUIGUAL expr
+            | expr MAIOR expr
+            | expr MAIOROUIGUAL expr
+            | expr EE expr
+            | expr OU expr
+
+    Proc : IF
+         | WHILE
+         | PRINTAR
+         | INPUTing
+
+    IF : SE LPAREN exprRel RPAREN ENTAO Codigo FIM_COND PONTOVIRGULA
+       | SE LPAREN exprRel RPAREN ENTAO Codigo SENAO Codigo FIM_COND PONTOVIRGULA
+
+    WHILE : ENQUANTO LPAREN exprRel RPAREN FAZ Codigo FIM_ENQUANTO PONTOVIRGULA
+
+    PRINTAR : IMPRIMIR ASPAS ID ASPAS
+            | IMPRIMIR LPAREN expr RPAREN PONTOVIRGULA 
+
+    INPUTing : INPUT LPAREN ID RPAREN PONTOVIRGULA 
+    
+
+    Decl_lista_size : LISTA ID INT
+
+    Alterna_var : ALTERA ID IGUAL expr PONTOVIRGULA
+
+    Atrib_sem_decl : ID IGUAL expr PONTOVIRGULA
+
+    Altera_lista_elem : ALTERA ID LPAREN_RETO expr RPAREN_RETO IGUAL expr PONTOVIRGULA
+
+    Atrib_busca_lista : ID LPAREN_RETO expr RPAREN_RETO IGUAL LISTA
+
+    Printar_id : IMPRIMIR LPAREN ID RPAREN PONTOVIRGULA
+
+    Printar_var : IMPRIMIR LPAREN expr RPAREN PONTOVIRGULA
+
+    COMENTARIO : COMENTADO
+
+    Decl_matriz : MATRIZ INT NUM NUM VIRGULA ID
+
+    Atrib_matriz_com_expr : ALTERA ID LPAREN_RETO expr RPAREN_RETO LPAREN_RETO expr RPAREN_RETO IGUAL expr PONTOVIRGULA
+
+    Atrib_matriz_com_lista : ALTERA ID LPAREN_RETO expr RPAREN_RETO IGUAL LISTA
+
+    Atrib_busca_matriz : ID LPAREN_RETO expr RPAREN_RETO LPAREN_RETO expr RPAREN_RETO

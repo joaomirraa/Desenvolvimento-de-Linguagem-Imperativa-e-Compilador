@@ -1,0 +1,9 @@
+int x ;
+
+x = 4;
+
+enquanto ( x > 0) faz
+    altera x = x -1;
+fim_enquanto ;
+
+imprimir ( x ) ;

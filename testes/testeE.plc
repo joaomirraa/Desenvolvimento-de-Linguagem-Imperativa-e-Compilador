@@ -1,0 +1,9 @@
+int x ;
+
+lista int 2 , arr ;
+
+altera arr [0] = 1;
+
+x = arr [0];
+
+imprimir ( x ) ;

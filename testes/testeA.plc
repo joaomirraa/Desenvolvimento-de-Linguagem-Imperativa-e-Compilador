@@ -1,0 +1,7 @@
+int x , int y , int resultado ;
+
+x = 4;
+y = 1;
+
+resultado = x + y ;
+imprimir ( resultado ) ;

@@ -1,0 +1,1303 @@
+
+\documentclass[11pt,a4paper]{report}
+% diz o tipo de documento que vamos escrever: artigo, relatório, carta, etc...(relatório no nosso caso)
+% [11pt,a4paper] Define o tamanho da letra no documento, sendo que caso não seja expecificado assume tamanho 10 por default.
+% a4paper - Define o tamanho do papel.
+
+\usepackage[portuges]{babel}
+% babel - Todo o texto gerado é traduzido para Português de forma automática. “chapter” irá passar a “capítulo”... 
+% português - específica para o Português.
+
+\usepackage{graphicx} 
+% permite a inclusão de graficos, tabelas, figuras etc...
+
+\usepackage{url} 
+% serve para a utilização do comando \url{}
+
+\usepackage[utf8]{inputenc} 
+% Define a modelação utilizada, texto fonte (input)- usual "utf8" ou "latin1
+
+\usepackage{enumerate} 
+% permite nas listas enumeradas, a escolha de se os iems ao invés de numeração normal sao marcados com letras ou s-romanos.
+
+\usepackage{color} 
+% Serve para escrever usando cores
+
+\usepackage{multirow} 
+% serve para tabelas com multilinhas
+
+\usepackage{array} 
+% serve para a formatação especial de tabelas em forma de array
+
+\usepackage[pdftex]{hyperref} 
+% serve para transformar as referências internas do documento em hiper-ligações.
+
+\usepackage{listings}
+% serve para incluir blocos de código
+
+\definecolor{saddlebrown}{rgb}{0.55, 0.27, 0.07} 
+% serve para definir uma nova cor com o nome escolhido  neste caso "saddlebrown".
+
+\definecolor{comentario_cod}{rgb}{0,0.4,0}
+\definecolor{nlinha_cod}{rgb}{0.3,0.3,0.3}
+\definecolor{azul_cod}{rgb}{0,0,0.7}
+\definecolor{fundo_cod}{rgb}{0.90,0.90,0.90}
+\definecolor{importfuncao_cod}{rgb}{0.7,0,0.5}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{fundo_cod},   
+	commentstyle=\color{comentario_cod},
+	keywordstyle=\color{importfuncao_cod},
+	numberstyle=\tiny\color{nlinha_cod},
+	stringstyle=\color{azul_cod},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\usepackage{xspace} 
+% deteta se a posteriormente à palavra tem uma palavra, dando espaço neste caso, ou um sinal de pontuaçao, se o caso for este nao dá espaço
+
+\parindent=0pt 
+% define o espaço a deixar para indentar da primeira linha após um parágrafo
+
+\parskip=2pt 
+% define o espaçamento entre o parágrafo e o texto anterior
+
+\setlength{\oddsidemargin}{-1cm} 
+% define o espaço entre a margem e o texto
+
+\setlength{\textwidth}{18cm} 
+% Define o comprimento do texto na pagina
+
+\setlength{\headsep}{-1cm} 
+% define o espaço entre o texto e o cabeçalho
+
+\setlength{\textheight}{23cm} 
+% define a altura do texto na pagina
+
+% comando '\def' usado para definir abreviaturas (macros)
+% o 1º argumento é o nome do novo comando, já o 2º entre chavetas é o texto original, para que expande
+\def\darius{\textsf{Darius}\xspace}
+\def\antlr{\texttt{AnTLR}\xspace}
+\def\pe{\emph{Publicação Eletrónica}\xspace}
+\def\titulo#1{\section{#1}}    
+% no corpo do documento usa-se na forma '\titulo{MEU TITULO}'
+\def\super#1{{\em Supervisor: #1}\\ }
+\def\area#1{{\em \'{A}rea: #1}\\[0.2cm]}
+\def\resumo{\underline{Resumo}:\\ }
+
+\title{Processamento de Linguagens e Compiladores (3º Ano)\\
+       \textbf{Trabalho Prático 2}\\ Relatório de Desenvolvimento
+       }
+       
+\author{Alexandra Calafate\\ (a100060) \and Gonçalo Magalhães\\ (a100084)
+         \and João Mirra\\ (a100083)
+       }
+       
+\date{05/01/2025}
+
+\begin{document} % corpo do documento
+\maketitle % apresentar titulo, autor e data
+
+\begin{abstract}
+No contexto da disciplina de Processamento de Linguagens e Compiladores, o segundo projeto prático consiste em criar uma linguagem imperativa personalizada e desenvolver um compilador utilizando os módulos de gramáticas tradutoras disponíveis em Python. Este trabalho inclui a definição de uma gramática que converte a linguagem imperativa em código assembly, utilizando ferramentas como o lex e o yacc do Python. Neste relatório, descrevemos detalhadamente as escolhas realizadas, as produções implementadas na gramática e as etapas seguidas no desenvolvimento do compilador, de forma clara e objetiva.
+\end{abstract}
+
+\tableofcontents
+
+\chapter{Introdução} \label{chap:intro} %referência cruzada
+No âmbito da disciplina de Processamento de Linguagens e Compiladores, o professor Pedro Rangel Henriques propôs-nos um projeto de grupo com objetivos fundamentais. Estes incluem o desenvolvimento de competências na escrita eficiente de gramáticas, a capacitação para construir um processador de linguagens com base numa gramática tradutora e, ainda, a criação de um compilador capaz de gerar código para uma máquina de stack virtual.
+\\
+\\
+A linguagem a ser usada neste projeto, será uma linguagem imperativa simples com regras acordadas pelos elementos do grupo. 
+\\
+Com base na gramática independente do contexto (GIC) que definimos, o compilador desenvolvido para a nossa linguagem terá de gerar pseudo-código Assembly para uma VM.
+\\
+\\
+Neste documento apresentamos uma possivel solução para cada um dos problemas propostos, com recurso aos módulos 'Yacc/Lex' do 'PLY/Python'.
+
+\newpage
+
+\section*{Estrutura do Relatório}
+O relatório está organizado da seguinte forma:\\
+Iniciamos com uma breve introdução, no capítulo 1, onde é descrito o objetivo do trabalho a desenvolver.\\
+No capítulo 2, é apresentado o enunciado do problema proposto.\\
+No capítulo 3, descrevemos a estrutura do nosso trabalho.\\
+No capítulo 4, demonstramos o funcionamento de vários testes realizados pelo grupo.\\
+Por fim, no último capítulo, apresentamos a conclusão e uma análise final do trabalho realizado.
+
+\newpage
+
+\chapter{Problema Proposto}
+
+Pretende-se que comece por definir uma linguagem de programação imperativa simples, a seu gosto.
+Apenas deve ter em consideração que essa linguagem terá de permitir:
+\begin{itemize}
+	\item declarar variáveis atómicas do tipo inteiro, com os quais se podem realizar as habituais operações aritméticas, relacionais e lógicas.
+	\item efetuar instruções algorítmicas básicas como a atribuição do valor de expressões numéricas a variáveis.
+	\item ler do standard input e escrever no standard output.
+    \item efetuar instruções de seleção para o controlo do fluxo de execução.
+    \item efetuar instruções de repetição(cíclicas) para o controlo de fluxo de execução, permitindo o seu aninhamento.\\
+    \underline{Note} que deve implementar pelo menos o ciclo \textbf{while-do},\textbf{repeat-until} ou \textbf{for-do}.
+\end{itemize}
+Adicionalmente deve ainda suportar,à sua escolha, uma das duas funcionalidades seguintes:
+\begin{itemize}
+    \item declarar e manusear variáveis estruturadas do tipo array( a 1 ou 2 dimensões) de inteiros, em relação aos quais é apenas permitida a operação de indexação(índice inteiro).
+    \item definir e invocar subprogramas sem parâmetros mas que possam retornar um resultado do tipo inteiro.
+\end{itemize}
+
+\newpage
+
+\chapter{Elaboração da Solução}
+\section{Organização e estrutura}
+O nosso trabalho pode ser divido em \textbf{4} partes:
+\begin{itemize}
+\item Cosntrução da \textbf{GIC} que define a estrutura sintática da liguaguem.
+\item Construção do analizador léxico, \textbf{lexer} .
+\item Construção do analizador sintático, \textbf{parser} .
+\item Conversão das instruções para código \textbf{Assembly} da  VM.    
+\end{itemize}
+Todas as funcionalidades descritas neste capítulo podem ser encontradas no anexo A do documento. \\ \\
+
+\section{GIC}
+A nossa linguagem será gerada pela seguinte Grámatica Independente de Contexto (GIC):
+\begin{verbatim}
+
+## GIC que criamos
+
+Programa : Decls
+         | Atrib
+         | Decls Corpo
+         | Atrib Corpo
+         | Corpo
+
+Corpo : Codigo
+    
+Codigo : Proc Codigo
+       | Proc
+       | Decls Codigo
+       | Decls
+       | Atrib Codigo
+       | Atrib
+       | COMENTARIO Codigo
+       | COMENTARIO
+
+Decls : Decl PONTOVIRGULA
+      | Decl VIRGULA Decls
+
+Proc : IF
+     | WHILE
+     | PRINTAR
+
+Decl : INT ID
+     | MATRIZ INT NUM NUM VIRGULA ID
+     | LISTA INT NUM VIRGULA ID PONTOVIRGULA
+
+Atrib : INT ID IGUAL expr PONTOVIRGULA
+      | ID IGUAL expr PONTOVIRGULA
+      | ALTERA ID IGUAL expr PONTOVIRGULA
+      | ALTERA ID LPAREN_RETO expr RPAREN_RETO IGUAL expr PONTOVIRGULA                                  -- Lista
+      | ALTERA ID LPAREN_RETO expr RPAREN_RETO LPAREN_RETO expr RPAREN_RETO IGUAL expr PONTOVIRGULA     -- Matriz
+      | ALTERA ID LPAREN_RETO expr RPAREN_RETO IGUAL LISTA                                              -- add Lista em Matriz
+
+expr : exprArit
+     | exprRel
+     | NUM
+     | ID
+     | INPUT
+     | ID LPAREN_RETO expr RPAREN_RETO
+     | ID LPAREN_RETO expr RPAREN_RETO LPAREN_RETO expr RPAREN_RETO
+
+exprArit : exprArit PLUS term
+         | exprArit MINUS term
+         | term
+
+term : term TIMES factor
+     | term DIVIDE factor
+     | factor
+
+factor : NUM
+       | ID
+
+exprRel : expr IGUALIGUAL expr
+        | expr DIFERENTE expr
+        | expr MENOR expr
+        | expr MENOROUIGUAL expr
+        | expr MAIOR expr
+        | expr MAIOROUIGUAL expr
+        | expr EE expr
+        | expr OU expr
+
+IF : SE LPAREN exprRel RPAREN ENTAO Codigo FIM_COND PONTOVIRGULA
+   | SE LPAREN exprRel RPAREN ENTAO Codigo SENAO Codigo FIM_COND PONTOVIRGULA
+
+WHILE : ENQUANTO LPAREN exprRel RPAREN FAZ Codigo FIM_ENQUANTO PONTOVIRGULA
+
+PRINTAR : IMPRIMIR LPAREN FRASE RPAREN PONTOVIRGULA
+        | IMPRIMIR LPAREN ID RPAREN PONTOVIRGULA
+
+COMENTARIO : COMENTADO
+          
+\end{verbatim}
+
+\newpage
+
+\section{Lexer}
+Através de expressões regulares, o analisador léxico \textbf{lexer} tem a função de identificar os símbolos terminais (\textit{tokens}) da nossa linguagem. Para a sua implementação, utilizámos o módulo 'Lex' do 'PLY/Python'.\ \
+Os \textit{tokens} e as respetivas expressões regulares da nossa linguagem são os seguintes:
+
+\begin{verbatim}
+
+tokens = [
+    'ID',
+    'NUM',
+    'INT',
+
+    'PLUS',
+    'MINUS',
+    'TIMES',
+    'DIVIDE',
+
+    'MAIOR',
+    'MAIOROUIGUAL',
+    'MENOR',
+    'MENOROUIGUAL',
+    'IGUALIGUAL',
+    'DIFERENTE',
+    'EE',
+    'OU',
+
+    'LPAREN',
+    'RPAREN',
+    'LPAREN_RETO',
+    'RPAREN_RETO',
+
+    'SE',
+    'ENTAO',
+    'SENAO',
+    'FIM_COND',
+
+    'ENQUANTO',
+    'FAZ',
+    'FIM_ENQUANTO',
+
+    'INPUT',
+    'IMPRIMIR',
+    'VIRGULA',
+    'PONTOVIRGULA',
+    'IGUAL',
+
+    'COMENTADO',
+
+    'FRASE',
+
+    'ALTERA',
+
+    'LISTA',
+    'MATRIZ'
+]
+
+# Regras dos tokens
+t_INT = r'int'
+t_ID = r'\w+'
+
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_TIMES = r'\*'
+t_DIVIDE = r'/'
+
+t_MAIOR = r'>'
+t_MAIOROUIGUAL = r'>='
+t_MENOR = r'<'
+t_MENOROUIGUAL = '<='
+t_IGUALIGUAL = '=='
+t_DIFERENTE = '!='
+t_EE = '\\/'
+t_OU = '\\/'
+
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+t_LPAREN_RETO = r'\['
+t_RPAREN_RETO = r'\]'
+
+t_SE = r'ifse'
+t_ENTAO = r'entao'
+t_SENAO = r'senao'
+t_FIM_COND = r'fim_cond'
+
+t_ENQUANTO = r'enquanto'
+t_FAZ = r'faz'
+t_FIM_ENQUANTO = r'fim_enquanto'
+
+t_INPUT = r'input'
+t_IMPRIMIR = r'imprimir'
+t_VIRGULA = r','
+t_PONTOVIRGULA = r';'
+t_IGUAL = r'='
+
+t_COMENTADO = r'%[^\n]*'
+
+t_FRASE = r'"[^"]+"'
+
+t_ALTERA = r'altera'
+
+t_LISTA = r'lista'
+t_MATRIZ = r'matriz'
+
+\end{verbatim}
+
+A implementação do analisador léxico pode ser encontrada no anexo ao documento. 
+\\ \\
+
+\section{Parser e geração do código Assembly da VM}
+
+O \textbf{parser}, ou analisador sintático, tem a função de assegurar que o código escrito na nossa linguagem está corretamente estruturado de acordo com as regras gramaticais predefinidas. Em outras palavras, ele verifica se o código segue a sintaxe estabelecida. \ \
+
+Caso não haja erros sintáticos, o \textbf{parser} realiza a transformação do código na nossa linguagem para o código \textbf{Assembly} da máquina virtual. Se forem encontrados erros ou anomalias, uma mensagem de erro sintático será exibida ao utilizador. \ \
+
+A implementação deste analisador sintático está completa num dos anexos do nosso relatório, conforme solicitado pelo docente.
+
+\subsection{Notas sobre declaração de variáveis}
+
+Ao gerar o código para fazer a declaração de uma variável sem valor fazemos:
+\begin{lstlisting}
+PUSHI 0    
+\end{lstlisting}
+Sendo que variável tem valor default igual a 0.\\
+
+Por outro lado, para declará-la com valor fazemos:
+\begin{lstlisting}
+PUSHI <valor>
+STOREG <endereco>
+\end{lstlisting}
+No caso duma lista de valores fazemos:
+\begin{lstlisting}
+PUSHN <tamanho>
+\end{lstlisting}
+Para Inicializar todos os valores do array como 0.\\ \\
+Seja uma lista de tamanho 2 temos por exemplo:
+\begin{lstlisting}
+lista int 2, nomelista;
+\end{lstlisting}
+Para atribuir valores à lista fazemos:
+\begin{lstlisting}
+PUSHN <tamanho>
+PUSHGP
+PUSHI 0
+PUSHI <valor1>
+STOREN
+PUSHGP
+PUSHI 1
+PUSHI <valor2>
+STOREN
+\end{lstlisting}
+
+Para declarar uma matriz procedemos a: 
+\begin{lstlisting}
+matriz int <tamanho1> <tamanho2>, <nomematriz>;   
+\end{lstlisting}
+Caso a matriz m seja com formato 2x2, é gerado:
+\begin{lstlisting}
+PISHN 4
+\end{lstlisting}
+Os valores são inicializados a 0. \\
+
+Se pretendermos modificar os valores duma matriz temos de proceder da seguinte forma:
+\begin{enumerate}
+\item Alteramos uma especifica posição:
+\begin{lstlisting}
+altera <nomeMatriz>[<pos1>][<pos2>] = <valor>    
+\end{lstlisting}
+\end{enumerate}
+
+Tendo uma matriz 2x2 como exemplo, fazendo a alteração de valores temos:
+\begin{lstlisting}
+altera m [0][1] com <valor>
+\end{lstlisting}
+Gera-se o seguinte:
+\begin{lstlisting}
+PUSHN 4
+PUSHGP
+PUSHI 0
+PADD
+PUSHI 0
+PUSHI <valor>
+STOREN
+\end{lstlisting}
+
+\chapter{Demonstração do Funcionamento}
+\section{Geração e  execução de código Assembly}
+Para escrever instruç˜oes de acordo com as regras gramaticais da linguagem, o utilizador tem 2 opções de execução:
+\begin{enumerate}
+\item Caso esteja na mesma pasta dos restantes ficheiros:
+\begin{verbatim} 
+>> python yacc.py <ficheiro de input> 
+\end{verbatim}
+Por exemplo:
+\begin{verbatim} 
+>> python yacc.py testeA.plc
+\end{verbatim} 
+\item Caso esteja numa outra pasta:
+\begin{verbatim} 
+>> python yacc.py <.\pasta\ficheiro de input>
+\end{verbatim} 
+
+Por exemplo:
+\begin{verbatim} 
+>> python yacc.py .\testes\testeA.plc
+\end{verbatim} 
+\end{enumerate}
+\section{Teste 1}
+\underline{Ficheiro de input:} 'testeA.plc'
+\subsection{Conteúdo do ficheiro}
+
+\begin{lstlisting}[language=python]
+int x,int y, int resultado;
+
+x = 4;
+y = 1;
+
+resultado = x+y;
+
+imprimir(resultado);
+\end{lstlisting}
+
+\subsection{Código assembly gerado}
+\begin{lstlisting}[language=Assembler]
+PUSHI 0
+PUSHI 0
+PUSHI 0
+START
+PUSHI 4
+STOREG 3
+PUSHI 1
+STOREG 4
+PUSHG 3
+PUSHG 4
+ADD
+STOREG 5
+PUSHG 5
+WRITEI
+STOP
+\end{lstlisting}
+
+\subsection{Execução da VM com o código gerado}
+\begin{lstlisting}[language=python]
+5
+\end{lstlisting}
+
+\section{Teste 2}
+\underline{Ficheiro de input:} 'testeB.plc'.
+
+\subsection{Conteúdo do ficheiro}
+
+\begin{lstlisting}[language=python]
+int x;
+
+x = 4;
+
+enquanto (x > 0) faz
+    altera x = x-1;
+fim_enquanto;
+
+imprimir(x);
+\end{lstlisting}
+
+\subsection{Código assembly gerado}
+\begin{lstlisting}[language=Assembler]
+PUSHI 0
+START
+PUSHI 4
+STOREG 1
+l0c: NOP
+PUSHG 1
+PUSHI 0
+SUP
+JZ l0f
+PUSHG 1
+PUSHI 1
+SUB
+STOREG 1
+JUMP l0c
+l0f: NOP
+PUSHG 1
+WRITEI
+STOP
+\end{lstlisting}
+
+\subsection{Execução da VM com o código gerado}
+\begin{lstlisting}[language=python]
+0
+\end{lstlisting}
+
+\section{Teste 3}
+
+\underline{Ficheiro de input:} 'testeC.plc'.
+
+\subsection{Conteúdo do ficheiro}
+
+\begin{lstlisting}[language=python]
+int x;
+
+x = 4;
+
+ifse (x>1) entao 
+    imprimir("maior");
+fim_cond;
+\end{lstlisting}
+
+\subsection{Código assembly gerado}
+\begin{lstlisting}[languague=Assembler]
+PUSHI 0
+START
+PUSHI 4
+STOREG 1
+PUSHG 1
+PUSHI 1
+SUP
+JZ l0
+PUSHS "maior"
+WRITES
+l0: NOP
+STOP
+\end{lstlisting}
+
+\subsection{Execução da VM com o código gerado}
+\begin{lstlisting}[language=python]
+maior
+\end{lstlisting}
+
+\section{Teste 4}
+
+\underline{Ficheiro de input:} 'testeD.plc'.
+
+\subsection{Conteúdo do ficheiro}
+
+\begin{lstlisting}[language=python]
+int x;
+
+x = 4;
+
+ifse (x>5) entao 
+    imprimir("maior");
+senao
+    imprimir("menor");
+fim_cond;
+\end{lstlisting}
+
+\subsection{Código assembly gerado}
+\begin{lstlisting}[languague=Assembler]
+PUSHI 0
+START
+PUSHI 4
+STOREG 1
+PUSHG 1
+PUSHI 5
+SUP
+JZ l0
+PUSHS "maior"
+WRITES
+JUMP l0f
+l0: NOP
+PUSHS "menor"
+WRITES
+l0f: NOP
+STOP
+\end{lstlisting}
+
+\subsection{Execução da VM com o código gerado}
+\begin{lstlisting}[language=python]
+menor
+\end{lstlisting}
+
+\section{Teste 5}
+
+\underline{Ficheiro de input:} 'testeE.plc'.
+
+\subsection{Conteúdo do ficheiro}
+
+\begin{lstlisting}[language=python]
+int x;
+
+lista int 2, arr;
+
+altera arr[0] = 1;
+
+x = arr[0];
+
+imprimir(x);
+\end{lstlisting}
+
+\subsection{Código assembly gerado}
+\begin{lstlisting}[languague=Assembler]
+PUSHI 0
+START
+PUSHN 2
+PUSHGP
+PUSHI 1
+PADD
+PUSHI 0
+PUSHI 1
+STOREN
+PUSHGP
+PUSHI 1
+PADD
+PUSHI 0
+LOADN
+STOREG 3
+PUSHG 3
+WRITEI
+STOP
+\end{lstlisting}
+
+\subsection{Execução da VM com o código gerado}
+\begin{lstlisting}[language=python]
+1
+\end{lstlisting}
+
+\section{Teste 6}
+
+\underline{Ficheiro de input:} 'testeF.plo'.
+
+\subsection{Conteúdo do ficheiro}
+
+\begin{lstlisting}[language=python]
+int x;
+int y;
+
+x = 2*4 + 5;
+y = 5 + 4*2;    
+
+imprimir(x);
+imprimir("\n");
+imprimir(y);
+\end{lstlisting}
+
+\subsection{Código assembly gerado}
+\begin{lstlisting}[languague=Assembler]
+PUSHI 0
+START
+PUSHI 0
+PUSHI 2
+PUSHI 4
+MUL
+PUSHI 5
+ADD
+STOREG 2
+NOP
+PUSHI 5
+PUSHI 4
+PUSHI 2
+MUL
+ADD
+STOREG 3
+PUSHG 2
+WRITEI
+PUSHS "\n"
+WRITES
+PUSHG 3
+WRITEI
+STOP
+\end{lstlisting}
+
+\subsection{Execução da VM com o código gerado}
+\begin{lstlisting}[language=python]
+13
+13
+\end{lstlisting}
+
+\chapter{Conclusão}
+
+Ao longo deste projeto, procuramos constantemente aplicar os conhecimentos adquiridos nas aulas (teóricas e práticas), o que nos permitiu aprofundar e solidificar de maneira mais eficaz os conceitos abordados nesta Unidade Curricular.
+
+Consideramos que, de forma geral, conseguimos atingir os objetivos preestabelecidos, o que nos proporcionou uma maior competência na elaboração de gramáticas e no desenvolvimento de compiladores de linguagens. Embora reconheçamos que poderíamos ter implementado uma gramática mais eficiente, acreditamos que a gramática criada atende aos requisitos do trabalho e resolve os problemas da linguagem em questão. Além disso, esta iniciativa contribuiu de forma significativa para ampliar o nosso entendimento sobre a máquina virtual e aprimorar as nossas habilidades na linguagem Assembly.
+
+Em resumo, todo o empenho dedicado à realização deste projeto mostrou-se extremamente benéfico, consolidando as nossas bases e proporcionando uma maior facilidade na abordagem de temas específicos da Unidade Curricular, que podem ser relevantes em uma futura trajetória profissional.
+
+\appendix % apendice 
+\chapter{Código do Programa}
+\section{Apêndice}
+\textbf{Ficheiro lex.py}
+\begin{scriptsize}
+\begin{lstlisting}[language=python]
+# lex.py
+
+import ply.lex as lex # Import do ply.lex
+
+# Definição dos tokens
+tokens = [
+    'ID',
+    'NUM',
+    'INT',
+
+    'PLUS',
+    'MINUS',
+    'TIMES',
+    'DIVIDE',
+
+    'MAIOR',
+    'MAIOROUIGUAL',
+    'MENOR',
+    'MENOROUIGUAL',
+    'IGUALIGUAL',
+    'DIFERENTE',
+    'EE',
+    'OU',
+
+    'LPAREN',
+    'RPAREN',
+    'LPAREN_RETO',
+    'RPAREN_RETO',
+
+    'SE',
+    'ENTAO',
+    'SENAO',
+    'FIM_COND',
+
+    'ENQUANTO',
+    'FAZ',
+    'FIM_ENQUANTO',
+
+    'INPUT',
+    'IMPRIMIR',
+    'VIRGULA',
+    'PONTOVIRGULA',
+    'IGUAL',
+
+    'COMENTADO',
+
+    'FRASE',
+
+    'ALTERA',
+
+    'LISTA',
+    'MATRIZ'
+]
+
+# Regras dos tokens
+t_INT = r'int'
+t_ID = r'\w+'
+
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_TIMES = r'\*'
+t_DIVIDE = r'/'
+
+t_MAIOR = r'>'
+t_MAIOROUIGUAL = r'>='
+t_MENOR = r'<'
+t_MENOROUIGUAL = '<='
+t_IGUALIGUAL = '=='
+t_DIFERENTE = '!='
+t_EE = '\\/'
+t_OU = '\\/'
+
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+t_LPAREN_RETO = r'\['
+t_RPAREN_RETO = r'\]'
+
+t_SE = r'ifse'
+t_ENTAO = r'entao'
+t_SENAO = r'senao'
+t_FIM_COND = r'fim_cond'
+
+t_ENQUANTO = r'enquanto'
+t_FAZ = r'faz'
+t_FIM_ENQUANTO = r'fim_enquanto'
+
+t_INPUT = r'input'
+t_IMPRIMIR = r'imprimir'
+t_VIRGULA = r','
+t_PONTOVIRGULA = r';'
+t_IGUAL = r'='
+
+t_COMENTADO = r'%[^\n]*'
+
+t_FRASE = r'"[^"]+"'
+
+t_ALTERA = r'altera'
+
+t_LISTA = r'lista'
+t_MATRIZ = r'matriz'
+
+def t_NUM(t):
+    r'\d+'
+    t.value = int(t.value)
+    return t
+
+# Ignorar espacos em branco e tabulacoes \t
+t_ignore = ' \t'
+
+# Tratamento do \n
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+
+# Erro 
+def t_error(t):
+    print(f"Erro no caracter: '{t.value[0]}'")
+    t.lexer.skip(1)
+
+# Analisador léxico
+lexer = lex.lex()
+
+
+\end{lstlisting}
+\end{scriptsize}
+
+\chapter{Código do Programa}
+\section{Apêndice}
+\textbf{Ficheiro yacc.py}
+\begin{scriptsize} 
+\begin{lstlisting}[language=python]
+
+import ply.yacc as yacc
+from lex import *   # Import do nosso ficheiro criado 
+
+# Imports para manipulação de files necessários
+import sys
+import os
+
+# Programa apenas com declarações ou atribuições
+def p_Programa_Empty(p):
+    '''
+    Programa : Decls
+             | Atrib
+    '''
+    parser.assembly = f'{p[1]}'
+
+# Programa com corpo pós declarações e atribuições
+def p_Programa(p):
+    '''
+    Programa : Decls Corpo
+             | Atrib Corpo
+    '''
+    parser.assembly = f'{p[1]}START\n{p[2]}STOP\n'
+
+# Programa -> Corpo
+def p_Programa_Corpo(p):
+    '''
+    Programa : Corpo
+    '''
+    parser.assembly = f"START\n{p[1]}STOP\n"
+
+# Corpo -> Codigo
+def p_Corpo(p):
+    '''
+    Corpo : Codigo
+    '''
+    p[0] = f"{p[1]}"
+
+# Codigo recursivamente
+def p_Codigo_Rec(p):
+    '''
+    Codigo : Proc Codigo
+           | Decls Codigo
+           | Atrib Codigo
+           | COMENTARIO Codigo
+    '''
+    p[0] = f"{p[1]}{p[2]}"
+
+# Codigo pode ser um processo, atribuicao, declaracao ou um comentario
+def p_Codigo(p):
+    '''
+    Codigo : Proc
+           | Atrib
+           | Decls
+           | COMENTARIO
+    '''
+    p[0] = f"{p[1]}"
+
+# declaracao unica terminada em ponto e virgula
+def p_Decls(p):
+    "Decls : Decl PONTOVIRGULA"
+    p[0] = f'{p[1]}'
+
+# declaração recursiva separada por virgulas
+def p_DeclsRec(p):
+    "Decls : Decl VIRGULA Decls"
+    p[0] = f'{p[1]}{p[3]}'
+
+# expr pode ser arit ou relativa
+def p_expr_arit(p):
+    '''
+    expr : exprArit
+         | exprRel
+    '''
+    p[0] = p[1]
+
+# procedimento pode ser um if,while ou um print
+def p_Proc(p):
+    '''
+    Proc : IF
+         | WHILE
+         | PRINTAR
+    '''
+    p[0] = p[1]
+
+
+# Declaração de uma variavel sem valor
+def p_Decl(p):
+    "Decl : INT ID"
+    varName = p[2]
+
+    # é verificado no dicionario de variaveis se ela ja existe
+    if varName not in parser.variaveis:
+        parser.variaveis[varName] = (parser.stackPointer, None)
+        p[0] = "PUSHI 0\n"                  # Atribuido valor 0 por definição
+        parser.stackPointer += 1
+    else:
+        parser.exito = False
+        parser.error = f"Variável com o nome {varName} já existe"
+    parser.linhaDeCodigo +=1
+
+# Declaração de uma variável com atribuição de um valor
+def p_Atrib_expr(p):
+    "Atrib : INT ID IGUAL expr PONTOVIRGULA"
+    varName = p[2]
+
+    # é verificado no dicionario de variaveis se ela ja existe
+    if varName not in parser.variaveis:
+        value = p[4]
+        parser.variaveis[varName] = (parser.stackPointer, None)
+        p[0] = f"{value}STOREG {parser.stackPointer}\n"
+        parser.stackPointer += 1
+    else:
+        parser.exito = False
+        parser.error = f"Variável com o nome {varName} já existe"
+    parser.linhaDeCodigo +=1
+
+# Atribuição de uma variavel ja declarada
+def p_Atrib_sem_decl(p):
+    "Atrib : ID IGUAL expr PONTOVIRGULA"
+    varName = p[1]
+
+    # Verifica se a tal variavel já existe mesmo
+    if varName in parser.variaveis:
+        value = p[3]
+        parser.variaveis[varName] = (parser.stackPointer, None)
+        p[0] = f"{value}STOREG {parser.stackPointer}\n"
+        parser.stackPointer += 1
+    else:
+        parser.exito = False
+        parser.error = f"Variável com o nome {varName} não existe"
+    parser.linhaDeCodigo +=1
+
+
+# Altera valor de um variável
+def p_alterna_var(p):
+    "Atrib : ALTERA ID IGUAL expr PONTOVIRGULA"
+    varName = p[2]
+
+    # verifica se a variavel ja existe mesmo
+    if varName in parser.variaveis:
+        p[0] = f"{p[4]}STOREG {parser.variaveis[varName][0]}\n"
+    parser.linhaDeCodigo +=1
+
+# expr pode ser um simples valor
+def p_expr(p):
+    "expr : NUM"
+    p[0] = f"PUSHI {int(p[1])}\n"
+
+# expr pode ser uma variavel
+def p_expr_var(p):
+    "expr : ID"
+    varName = p[1]
+    if varName in parser.variaveis:
+        p[0] = f"PUSHG {parser.variaveis[varName][0]}\n"
+
+# expr pode receber input
+def p_expr_input(p):
+    "expr : INPUT"
+    p[0] = f"READ\nATOI\n"
+
+
+# Declara lista com tamanho INT
+def p_DeclLista_Size(p):
+    '''Decl : LISTA INT NUM VIRGULA ID''' # lista int 5, arr;
+    listName = p[5]
+    size = int(p[3])
+
+    # verifica se esse nome já não esta a ser usado noutra variavel
+    if listName not in parser.variaveis:
+        # tamanho obrigatoriamente maior que 0
+        if size > 0:
+            parser.variaveis[listName] = (parser.stackPointer, size)
+            p[0] = f"PUSHN {size}\n"
+            parser.stackPointer += size
+        else:
+            parser.error = f"Impossível declarar um array de tamanho {size}"
+            parser.exito = False
+    else:
+        parser.error = (
+            f"Variável com o nome {listName} já definida anteriormente.")
+        parser.exito = False
+    parser.linhaDeCodigo +=1
+
+
+# Altera valor de um indice da lista
+def p_AlteraLista_elem(p):
+    "Atrib : ALTERA ID LPAREN_RETO expr RPAREN_RETO IGUAL expr PONTOVIRGULA" # altera arr[3] = 4;
+    varName = p[2]
+    
+    # garante que a lista esta declarada
+    if varName in parser.variaveis:
+        p[0] = f"PUSHGP\nPUSHI {parser.variaveis[varName][0]}\nPADD\n{p[4]}{p[7]}STOREN\n"
+    else:
+        parser.error = f"Variável com o nome {varName} não definida"
+        parser.exito = False
+    parser.linhaDeCodigo +=1
+
+# Função que vai buscar o valor do indice na lista
+def p_AtribBusca_Lista(p):
+    "expr : ID LPAREN_RETO expr RPAREN_RETO" # x = arr[4];
+    varName = p[1]
+    indice = p[3]
+    
+    # garante que a lista existe
+    if varName in parser.variaveis:
+        p[0] = f"PUSHGP\nPUSHI {parser.variaveis[varName][0]}\nPADD\n{indice}LOADN\n"
+    else:
+        parser.error = (
+            f"Variável com o nome {varName} não definida anteriormente.")
+        parser.exito = False
+    parser.linhaDeCodigo += 1
+
+# Declara matriz com tamanho INT INT
+def p_DeclMatriz(p):
+    "Decl : MATRIZ INT NUM NUM VIRGULA ID" # matriz int 3 2, mat;
+    listName = p[6]
+    size = int(p[3])
+    size1 = int(p[4])
+
+    # Garante que o nome escolhido já não esta a ser usado
+    if listName not in parser.variaveis:
+        parser.variaveis[listName] = (parser.stackPointer, size, size1)
+        p[0] = f"PUSHN {size*size1}\n"
+        parser.stackPointer += size*size1
+    else:
+        parser.error = (
+            f"Variável com o nome {listName} já definida anteriormente.")
+        parser.exito = False
+    parser.linhaDeCodigo +=1
+
+# Função que altera o valor de um indice da matriz por outro
+def p_AtribMatriz_comExpr(p):
+    "Atrib : ALTERA ID LPAREN_RETO expr RPAREN_RETO LPAREN_RETO expr RPAREN_RETO IGUAL expr PONTOVIRGULA" # altera mat[0][1] = 2;
+    matName = p[2]
+    indice1 = p[4]
+    indice2 = p[7]
+    valor = p[10]
+
+    # Garante que a matriz existe
+    if matName in parser.variaveis:
+        if len(parser.variaveis[matName]) == 3:
+            p[0] = f"PUSHGP\nPUSHI {parser.variaveis[matName][0]}\nPADD\n{indice1}PUSHI {parser.variaveis[matName][2]}\nMUL\nPADD\n{indice2}{valor}STOREN\n"
+        else:
+            parser.error = f"Operação inválida, variável {matName} não é uma matriz"
+            parser.exito = False
+    else:
+        parser.error = f"Variável não declarada anteriormente"
+        parser.exito = False
+    parser.linhaDeCodigo +=1
+
+# Função que vai buscar o valor do indice na matriz
+def p_AtribBusca_Matriz(p):
+    "expr : ID LPAREN_RETO expr RPAREN_RETO LPAREN_RETO expr RPAREN_RETO"                   # para usar tipo x = mat[1][2]
+    varName = p[1]
+    indice1 = p[3]
+    indice2 = p[6]
+    
+    # garante que a matriz existe
+    if varName in parser.variaveis:
+        p[0] = f"PUSHGP\nPUSHI {parser.variaveis[varName][0]}\nPADD\n{indice1}PUSHI {parser.variaveis[varName][2]}\nMUL\nPADD\n{indice2}LOADN\n"
+    else:
+        parser.error = f"Variável com o nome {varName} não definida"
+        parser.exito = False
+    parser.linhaDeCodigo +=1
+
+# Expressão Aritmética da soma
+def p_PLUS(p):
+    "exprArit : exprArit PLUS term"
+    p[0] = f"{p[1]}{p[3]}ADD\n"
+
+# Expressão Aritmética sub
+def p_MINUS(p):
+    "exprArit : exprArit MINUS term"
+    p[0] = f"{p[1]}{p[3]}SUB\n"
+
+# Expressao Atrimética pode ser um termo apenas
+def p_expr_arit_term(p):
+    '''exprArit : term'''
+    p[0] = p[1]
+
+# Expressão Aritmética da mult
+def p_TIMES(p):
+    "term : term TIMES factor"
+    p[0] = f"{p[1]}{p[3]}MUL\n"
+
+# Expressão Aritmética da div
+def p_DIVIDE(p):
+    "term : term DIVIDE factor"
+    p[0] = f"{p[1]}{p[3]}DIV\n"
+
+# term pode ser um factor
+def p_term(p):
+    "term : factor"
+    p[0] = p[1]
+
+# um factor pode ser um numero
+def p_factor_num(p):
+    '''factor : NUM'''
+    p[0] = f"PUSHI {int(p[1])}\n"
+
+# um factor tmb pode ser uma variavel
+def p_factor_id(p):
+    '''factor : ID'''
+    varName = p[1]
+
+    # garante que a var existe
+    if varName in parser.variaveis:
+        p[0] = f"PUSHG {parser.variaveis[varName][0]}\n"
+
+# Expressão Relativa do igual
+def p_IGUALIGUAL(p):
+    "exprRel : expr IGUALIGUAL expr"
+    p[0] = f"{p[1]}{p[3]}EQUAL\n"
+
+# Expressão Relativa da diff (!=)
+def p_DIFERENTE(p):
+    "exprRel : expr DIFERENTE expr"
+    p[0] = f"{p[1]}{p[3]}NOT\nEQUAL\n"
+
+# Expressão Relativa menor
+def p_MENOR(p):
+    "exprRel : expr MENOR expr"
+    p[0] = f"{p[1]}{p[3]}INF\n"
+
+# Expressão Relativa menor ou igual
+def p_MENOROUIGUAL(p):
+    "exprRel : expr MENOROUIGUAL expr"
+    p[0] = f"{p[1]}{p[3]}INFEQ\n"
+
+# Expressão Relativa maior
+def p_MAIOR(p):
+    "exprRel : expr MAIOR expr"
+    p[0] = f"{p[1]}{p[3]}SUP\n"
+
+# Expressão Relativa maior ou igual
+def p_MAIOROUIGUAL(p):
+    "exprRel : expr MAIOROUIGUAL expr"
+    p[0] = f"{p[1]}{p[3]}SUPEQ\n"
+
+# Expressão Relativa EE (and)
+def p_EE(p):
+    "exprRel : expr EE expr" 
+    p[0] = f"{p[1]}{p[3]}ADD\nPUSHI 2\nEQUAL\n"
+
+# Expressão Relativa "OU" (or)
+def p_OU(p):
+    "exprRel : expr OU expr"
+    p[0] = f"{p[1]}{p[3]}ADD\nPUSHI 1\nSUPEQ\n"
+
+# Controlo de fluxo (if then)
+def p_IF_THEN(p):
+    "IF : SE LPAREN exprRel RPAREN ENTAO Codigo FIM_COND PONTOVIRGULA"
+    p[0] = f"{p[3]}JZ l{parser.labels}\n{p[6]}l{parser.labels}: NOP\n"  # NOP não faz nada na vm
+    parser.labels += 1
+    parser.linhaDeCodigo+=1
+
+# Controlo de fluxo (if then else)
+def p_IF_THEN_ELSE(p):
+    "IF : SE LPAREN exprRel RPAREN ENTAO Codigo SENAO Codigo FIM_COND PONTOVIRGULA"
+    p[0] = f"{p[3]}JZ l{parser.labels}\n{p[6]}JUMP l{parser.labels}f\nl{parser.labels}: NOP\n{p[8]}l{parser.labels}f: NOP\n" # NOP não faz nada na vm
+    parser.labels += 1
+    parser.linhaDeCodigo+=1
+
+# Ciclo While
+def p_WHILE(p):
+    "WHILE : ENQUANTO LPAREN exprRel RPAREN FAZ Codigo FIM_ENQUANTO PONTOVIRGULA"
+    p[0] = f'l{parser.labels}c: NOP\n{p[3]}JZ l{parser.labels}f\n{p[6]}JUMP l{parser.labels}c\nl{parser.labels}f: NOP\n' # NOP não faz nada na vm
+    parser.labels += 1
+    parser.linhaDeCodigo+=1
+
+# Print duma frase (string)
+def p_PRINTAR_ID(p):
+    '''PRINTAR : IMPRIMIR LPAREN FRASE RPAREN PONTOVIRGULA'''
+    p[0] = f'PUSHS {p[3]}\nWRITES\n'
+    parser.linhaDeCodigo+=1
+
+# print do valor de uma variavel
+def p_PRINTAR_var(p):
+    '''PRINTAR : IMPRIMIR LPAREN ID RPAREN PONTOVIRGULA'''
+    p[0] = f'PUSHG {parser.variaveis[p[3]][0]}\nWRITEI\n'
+    parser.linhaDeCodigo+=1
+
+# Codigo Comentado
+def p_COMENTARIO(p):
+    '''COMENTARIO : COMENTADO'''
+    p[0] = "NOP\n" # NOP não faz nada na vm
+
+def p_error(p):
+    print(f"Erro de sintaxe na entrada: {p.value}")
+
+
+##
+parser = yacc.yacc()
+parser.exito = True
+parser.error = ""
+parser.assembly = ""        # Codigo pra VM que vai sendo gerado
+parser.variaveis = {}       # dicionario que armazena as variaveis declaradas
+parser.stackPointer = 0     # necessario para a gestão da Stack da VM
+parser.linhaDeCodigo = 0
+parser.labels = 0
+
+assembly = ""           # codigo para a VM final
+
+
+if len(sys.argv) == 2:
+    inputFileName = sys.argv[1]
+    if inputFileName[-4:] == ".plc":            # ficheiro de entrada precisa da extensão ".plc"
+        file = open(inputFileName, "r")
+        content = file.read()
+        parser.parse(content)
+        if parser.exito:
+            assembly += parser.assembly         # Atribuição do codigo para a VM
+            print(parser.variaveis)
+        else:
+            print("Erro:")
+            print(parser.error)
+            print(parser.variaveis)
+            sys.exit()
+        file.close()
+        outputFileName = "a.vm"                 # cria um file chamado "a.vm" para rodar na VM
+
+        # Verifica se o arquivo de saída já existe e o remove antes de criar um novo
+        if os.path.exists(outputFileName):
+            os.remove(outputFileName)
+
+        outputFile = open(outputFileName, "w")
+        outputFile.write(assembly)              # Escrita do codigo para a VM Final
+        outputFile.close()
+
+        print("File saved successfully")
+
+    else:
+        print("Invalid file extension")
+
+\end{lstlisting}
+\end{scriptsize}
+
+\end{document} 
